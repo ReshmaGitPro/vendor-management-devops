@@ -60,6 +60,11 @@ jobs:
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:${{ github.sha }}
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:stable
 
+      - name: Verify Images
+        run: |
+          aws ecr list-images --repository-name $FRONTEND_REPO
+          aws ecr list-images --repository-name $BACKEND_REPO
+
       - name: Show Summary
         run: |
           echo "Build completed successfully" >> $GITHUB_STEP_SUMMARY
