@@ -1,0 +1,12 @@
+# Terraform
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+terraform.log
+
+# Optional backups
+*.backup
+
+# SSH keys
+terraform-ec2-key
+terraform-ec2-key.pub
