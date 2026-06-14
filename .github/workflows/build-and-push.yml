@@ -110,4 +110,3 @@ steps:
       echo "Commit SHA Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
       echo "Stable Tag: stable" >> $GITHUB_STEP_SUMMARY
       echo "Images successfully built and pushed to Amazon ECR." >> $GITHUB_STEP_SUMMARY
-```
