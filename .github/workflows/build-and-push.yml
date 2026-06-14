@@ -1,0 +1,113 @@
+name: Build and Push Docker Images
+
+on:
+push:
+branches:
+- main
+
+workflow_dispatch:
+
+concurrency:
+group: production-build
+cancel-in-progress: true
+
+env:
+AWS_REGION: ${{ secrets.AWS_REGION }}
+AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+FRONTEND_REPO: reshma-frontend-repository
+BACKEND_REPO: reshma-backend-repository
+
+jobs:
+build-and-push:
+name: Build and Push Images
+runs-on: ubuntu-latest
+
+```
+permissions:
+  contents: read
+
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v4
+
+  - name: Configure AWS Credentials
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws-region: ${{ secrets.AWS_REGION }}
+
+  - name: Login to Amazon ECR
+    uses: aws-actions/amazon-ecr-login@v2
+
+  - name: Set up Docker Buildx
+    uses: docker/setup-buildx-action@v3
+
+  - name: Cache Docker Layers
+    uses: actions/cache@v4
+    with:
+      path: /tmp/.buildx-cache
+      key: ${{ runner.os }}-buildx-${{ github.sha }}
+      restore-keys: |
+        ${{ runner.os }}-buildx-
+
+  - name: Build React Frontend Image
+    run: |
+      docker build \
+        -t frontend-app:${{ github.sha }} \
+        -t frontend-app:stable \
+        ./frontend
+
+  - name: Build Spring Boot Backend Image
+    run: |
+      docker build \
+        -t backend-app:${{ github.sha }} \
+        -t backend-app:stable \
+        ./backend
+
+  - name: Verify Images Built
+    run: docker images
+
+  - name: Tag Frontend Images
+    run: |
+      docker tag frontend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:${{ github.sha }}
+      docker tag frontend-app:stable $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:stable
+
+  - name: Tag Backend Images
+    run: |
+      docker tag backend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:${{ github.sha }}
+      docker tag backend-app:stable $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:stable
+
+  - name: Push Frontend Images
+    run: |
+      docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:${{ github.sha }}
+      docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:stable
+
+  - name: Push Backend Images
+    run: |
+      docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:${{ github.sha }}
+      docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:stable
+
+  - name: Start Frontend Image Scan
+    run: |
+      aws ecr start-image-scan \
+        --repository-name $FRONTEND_REPO \
+        --image-id imageTag=${{ github.sha }}
+
+  - name: Start Backend Image Scan
+    run: |
+      aws ecr start-image-scan \
+        --repository-name $BACKEND_REPO \
+        --image-id imageTag=${{ github.sha }}
+
+  - name: Workflow Summary
+    run: |
+      echo "## CI/CD Build Summary" >> $GITHUB_STEP_SUMMARY
+      echo "" >> $GITHUB_STEP_SUMMARY
+      echo "Frontend Repository: $FRONTEND_REPO" >> $GITHUB_STEP_SUMMARY
+      echo "Backend Repository: $BACKEND_REPO" >> $GITHUB_STEP_SUMMARY
+      echo "Commit SHA Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+      echo "Stable Tag: stable" >> $GITHUB_STEP_SUMMARY
+      echo "Images successfully built and pushed to Amazon ECR." >> $GITHUB_STEP_SUMMARY
+```
