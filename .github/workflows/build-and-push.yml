@@ -1,71 +1,69 @@
 name: Build and Push Docker Images
 
 on:
-push:
-branches:
-- main
-
-workflow_dispatch:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 concurrency:
-group: production-build
-cancel-in-progress: true
+  group: production-build
+  cancel-in-progress: true
 
 env:
-AWS_REGION: ${{ secrets.AWS_REGION }}
-AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-FRONTEND_REPO: reshma-frontend-repository
-BACKEND_REPO: reshma-backend-repository
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  FRONTEND_REPO: reshma-frontend-repository
+  BACKEND_REPO: reshma-backend-repository
 
 jobs:
-build-and-push:
-name: Build and Push Images
-runs-on: ubuntu-latest
+  build-and-push:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
 
-permissions:
-  contents: read
+    permissions:
+      contents: read
 
-steps:
-  - name: Checkout Repository
-    uses: actions/checkout@v4
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  - name: Configure AWS Credentials
-    uses: aws-actions/configure-aws-credentials@v4
-    with:
-      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      aws-region: ${{ secrets.AWS_REGION }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-  - name: Login to Amazon ECR
-    uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-  - name: Build Frontend Image
-    run: |
-      docker build -t frontend-app:${{ github.sha }} ./frontend
-      docker tag frontend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:${{ github.sha }}
-      docker tag frontend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:stable
+      - name: Build Frontend Image
+        run: |
+          docker build -t frontend-app:${{ github.sha }} ./frontend
+          docker tag frontend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:${{ github.sha }}
+          docker tag frontend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:stable
 
-  - name: Build Backend Image
-    run: |
-      docker build -t backend-app:${{ github.sha }} ./backend
-      docker tag backend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:${{ github.sha }}
-      docker tag backend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:stable
+      - name: Build Backend Image
+        run: |
+          docker build -t backend-app:${{ github.sha }} ./backend
+          docker tag backend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:${{ github.sha }}
+          docker tag backend-app:${{ github.sha }} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:stable
 
-  - name: Push Frontend Image
-    run: |
-      docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:${{ github.sha }}
-      docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:stable
+      - name: Push Frontend Image
+        run: |
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:${{ github.sha }}
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:stable
 
-  - name: Push Backend Image
-    run: |
-      docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:${{ github.sha }}
-      docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:stable
+      - name: Push Backend Image
+        run: |
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:${{ github.sha }}
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:stable
 
-  - name: Show Summary
-    run: |
-      echo "Build completed successfully" >> $GITHUB_STEP_SUMMARY
-      echo "Frontend Repo: $FRONTEND_REPO" >> $GITHUB_STEP_SUMMARY
-      echo "Backend Repo: $BACKEND_REPO" >> $GITHUB_STEP_SUMMARY
-      echo "SHA Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-      echo "Stable Tag: stable" >> $GITHUB_STEP_SUMMARY
-
+      - name: Show Summary
+        run: |
+          echo "Build completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "Frontend Repo: $FRONTEND_REPO" >> $GITHUB_STEP_SUMMARY
+          echo "Backend Repo: $BACKEND_REPO" >> $GITHUB_STEP_SUMMARY
+          echo "SHA Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Stable Tag: stable" >> $GITHUB_STEP_SUMMARY
