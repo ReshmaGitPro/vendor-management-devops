@@ -22,7 +22,6 @@ build-and-push:
 name: Build and Push Images
 runs-on: ubuntu-latest
 
-```
 permissions:
   contents: read
 
@@ -69,4 +68,4 @@ steps:
       echo "Backend Repo: $BACKEND_REPO" >> $GITHUB_STEP_SUMMARY
       echo "SHA Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
       echo "Stable Tag: stable" >> $GITHUB_STEP_SUMMARY
-```
+
