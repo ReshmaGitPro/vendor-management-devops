@@ -55,7 +55,7 @@ jobs:
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:${{ github.sha }}
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:stable
 
-      .- name: Push Backend Image
+      - name: Push Backend Image
         run: |
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:${{ github.sha }}
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:stable
@@ -66,10 +66,8 @@ jobs:
           aws ecr list-images --repository-name $BACKEND_REPO
 
       - name: Show Summary
-        if: always()
         run: |
-          echo "## CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
-          echo "Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "Build completed successfully" >> $GITHUB_STEP_SUMMARY
           echo "Frontend Repo: $FRONTEND_REPO" >> $GITHUB_STEP_SUMMARY
           echo "Backend Repo: $BACKEND_REPO" >> $GITHUB_STEP_SUMMARY
           echo "SHA Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
