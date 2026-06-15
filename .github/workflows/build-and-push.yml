@@ -66,8 +66,10 @@ jobs:
           aws ecr list-images --repository-name $BACKEND_REPO
 
       - name: Show Summary
+        if: always()
         run: |
-          echo "Build completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "## CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "Frontend Repo: $FRONTEND_REPO" >> $GITHUB_STEP_SUMMARY
           echo "Backend Repo: $BACKEND_REPO" >> $GITHUB_STEP_SUMMARY
           echo "SHA Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
