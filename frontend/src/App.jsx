@@ -7,6 +7,7 @@ function App() {
   return (
     <Router>
       <Toaster position="bottom-right" richColors />
+      <p>CI/CD TEST UPDATE - VERSION 2</p> 
       <AppRoutes />
     </Router>
   );
