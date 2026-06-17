@@ -93,4 +93,4 @@ jobs:
 
             echo "Compose file downloaded successfully"
 
-            ls -l /home/ubuntu/app
+            ls -l /home/ubuntu/app               
