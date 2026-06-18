@@ -64,8 +64,6 @@ jobs:
       - name: Show Summary
         run: |
           echo "Build completed successfully" >> $GITHUB_STEP_SUMMARY
-          echo "Frontend Repo: $FRONTEND_REPO" >> $GITHUB_STEP_SUMMARY
-          echo "Backend Repo: $BACKEND_REPO" >> $GITHUB_STEP_SUMMARY
           echo "SHA Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "Stable Tag: stable" >> $GITHUB_STEP_SUMMARY
           echo "Compose file uploaded to S3" >> $GITHUB_STEP_SUMMARY
@@ -83,29 +81,15 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            mkdir -p /home/ubuntu/app
+            chmod +x /home/ubuntu/deploy.sh
 
-            aws s3 cp \
-              s3://${{ secrets.S3_BUCKET_NAME }}/docker-compose.deploy.yml \
-              /home/ubuntu/app/docker-compose.yml
+            /home/ubuntu/deploy.sh \
+              "${{ github.sha }}" \
+              "${{ secrets.AWS_REGION }}" \
+              "${{ secrets.AWS_ACCOUNT_ID }}" \
+              "${{ secrets.S3_BUCKET_NAME }}"
 
-            cat > /home/ubuntu/app/.env << EOF
-            IMAGE_TAG=${{ github.sha }}
-            AWS_REGION=${{ secrets.AWS_REGION }}
-            AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
-            EOF
-
-            aws ecr get-login-password \
-              --region ${{ secrets.AWS_REGION }} | \
-              docker login \
-              --username AWS \
-              --password-stdin \
-              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
-            cd /home/ubuntu/app
-
-            docker compose pull
-
-            docker compose up -d
-
-            docker ps
+      - name: Deployment Summary
+        run: |
+          echo "Deployment completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "Docker Compose updated from S3" >> $GITHUB_STEP_SUMMARY

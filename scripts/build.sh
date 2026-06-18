@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -e 
 
 IMAGE_TAG=$1
 AWS_REGION=$2
