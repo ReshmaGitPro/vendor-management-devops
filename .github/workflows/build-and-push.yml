@@ -61,12 +61,19 @@ jobs:
             docker-compose.deploy.yml \
             s3://${{ secrets.S3_BUCKET_NAME }}/docker-compose.deploy.yml
 
+      - name: Upload Deploy Script to S3
+        run: |
+          aws s3 cp \
+            scripts/deploy.sh \
+            s3://${{ secrets.S3_BUCKET_NAME }}/deploy.sh
+
       - name: Show Summary
         run: |
           echo "Build completed successfully" >> $GITHUB_STEP_SUMMARY
           echo "SHA Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "Stable Tag: stable" >> $GITHUB_STEP_SUMMARY
           echo "Compose file uploaded to S3" >> $GITHUB_STEP_SUMMARY
+          echo "Deploy script uploaded to S3" >> $GITHUB_STEP_SUMMARY
 
   deploy:
     name: Deploy Application
@@ -81,6 +88,10 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            aws s3 cp \
+              s3://${{ secrets.S3_BUCKET_NAME }}/deploy.sh \
+              /home/ubuntu/deploy.sh
+
             chmod +x /home/ubuntu/deploy.sh
 
             /home/ubuntu/deploy.sh \
@@ -92,4 +103,5 @@ jobs:
       - name: Deployment Summary
         run: |
           echo "Deployment completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "Image Tag: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "Docker Compose updated from S3" >> $GITHUB_STEP_SUMMARY
