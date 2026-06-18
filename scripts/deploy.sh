@@ -9,9 +9,9 @@ S3_BUCKET_NAME=$4
 
 echo "Downloading latest compose file"
 
-aws s3 cp 
-s3://$S3_BUCKET_NAME/docker-compose.deploy.yml 
-/home/ubuntu/app/docker-compose.yml
+aws s3 cp \
+  s3://$S3_BUCKET_NAME/docker-compose.deploy.yml \
+  /home/ubuntu/app/docker-compose.yml
 
 cd /home/ubuntu/app
 
@@ -25,12 +25,12 @@ EOF
 
 echo "Logging into ECR"
 
-aws ecr get-login-password 
---region $AWS_REGION | 
-docker login 
---username AWS 
---password-stdin 
-$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+aws ecr get-login-password \
+  --region $AWS_REGION | \
+  docker login \
+  --username AWS \
+  --password-stdin \
+  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
 echo "Pulling latest images"
 
