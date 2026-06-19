@@ -39,15 +39,13 @@ echo "Pushing frontend image..."
 docker push \
   $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:$IMAGE_TAG
 
-docker push \
-  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_REPO:stable
+
 
 echo "Pushing backend image..."
 
 docker push \
   $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:$IMAGE_TAG
 
-docker push \
-  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_REPO:stable
+
 
 echo "Build and Push Completed Successfully"
