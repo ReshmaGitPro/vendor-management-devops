@@ -86,7 +86,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          command_timeout: 20m
           script: |
             aws s3 cp \
               s3://${{ secrets.S3_BUCKET_NAME }}/deploy.sh \
