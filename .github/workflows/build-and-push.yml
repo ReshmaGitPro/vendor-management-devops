@@ -102,13 +102,16 @@ jobs:
 
       - name: Verify Application
         run: |
-          STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://${{ secrets.EC2_HOST }}:5173)
+          echo "Waiting for application to be ready..."
+          sleep 15
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_HOST }}:5173)
+          echo "Received HTTP status: $HTTP_STATUS"
 
-          echo "HTTP Status: $STATUS"
-
-          if [ "$STATUS" -ne 200 ]; then
-            echo "Application verification failed"
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Deployment verification failed. App did not return 200 OK."
             exit 1
+            else
+              echo "Deployment verified successfully. App is live."
           fi
 
           echo "Application verification passed"       
