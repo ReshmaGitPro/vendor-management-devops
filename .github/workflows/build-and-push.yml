@@ -102,7 +102,16 @@ jobs:
 
       - name: Verify Application
         run: |
-          curl -f http://${{ secrets.EC2_HOST }}:5173        
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://${{ secrets.EC2_HOST }}:5173)
+
+          echo "HTTP Status: $STATUS"
+
+          if [ "$STATUS" -ne 200 ]; then
+            echo "Application verification failed"
+            exit 1
+          fi
+
+          echo "Application verification passed"       
 
       - name: Deployment Summary
         run: |
