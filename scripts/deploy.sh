@@ -32,6 +32,10 @@ aws ecr get-login-password \
   --password-stdin \
   $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
+echo "Cleaning old images"
+
+docker image prune -af
+
 echo "Pulling latest images"
 
 docker compose pull
@@ -40,9 +44,7 @@ echo "Restarting containers"
 
 docker compose up -d
 
-echo "Cleaning old images"
 
-docker image prune -af
 
 echo "Running containers"
 
