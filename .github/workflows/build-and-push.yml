@@ -87,6 +87,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 20m
           script: |
             aws s3 cp \
               s3://${{ secrets.S3_BUCKET_NAME }}/deploy.sh \
@@ -110,11 +111,11 @@ jobs:
           if [ "$HTTP_STATUS" -ne 200 ]; then
             echo "Deployment verification failed. App did not return 200 OK."
             exit 1
-            else
-              echo "Deployment verified successfully. App is live."
+          else
+            echo "Deployment verified successfully. App is live."
           fi
 
-          echo "Application verification passed"       
+          echo "Application verification passed"
 
       - name: Deployment Summary
         run: |
